@@ -68,29 +68,28 @@ def gen_inflow_namelist(rapid_inputs: str,
         start_date_code = start_date.strftime("%Y%m%d")
         end_date_code = end_date.strftime("%Y%m%d")
 
-        run_lsm_rapid_process(
-            rapid_executable_location='',
-            # rapid_io_files_location=rapidio_dir,
-            rapid_file_location=rapid_inputs,
-            # rapid_input_location='/Users/ricky/Documents/rapidio/rapid/input',
-            rapid_output_location=rapid_outputs,
-            lsm_data_location=lsm_data_dir,
-            simulation_start_datetime=start_date,
-            simulation_end_datetime=end_date,
-            generate_rapid_namelist_file=False,  # if you want to run RAPID manually later
-            run_rapid_simulation=False,  # if you want to run RAPID after generating inflow file
-            generate_return_periods_file=False,  # if you want to get return period file from RAPID simulation
-            return_period_method='weibull',
-            generate_seasonal_averages_file=False,
-            generate_seasonal_initialization_file=False,  # if you want to get seasonal init file from RAPID simulation
-            generate_initialization_file=False,  # if you want to generate qinit file from end of RAPID simulation
-            use_all_processors=True
-        )
+        # run_lsm_rapid_process(
+        #     rapid_executable_location='',
+        #     # rapid_io_files_location=rapidio_dir,
+        #     rapid_file_location=rapid_inputs,
+        #     # rapid_input_location='/Users/ricky/Documents/rapidio/rapid/input',
+        #     rapid_output_location=rapid_outputs,
+        #     lsm_data_location=lsm_data_dir,
+        #     simulation_start_datetime=start_date,
+        #     simulation_end_datetime=end_date,
+        #     generate_rapid_namelist_file=False,  # if you want to run RAPID manually later
+        #     run_rapid_simulation=False,  # if you want to run RAPID after generating inflow file
+        #     generate_return_periods_file=False,  # if you want to get return period file from RAPID simulation
+        #     return_period_method='weibull',
+        #     generate_seasonal_averages_file=False,
+        #     generate_seasonal_initialization_file=False,  # if you want to get seasonal init file from RAPID simulation
+        #     generate_initialization_file=False,  # if you want to generate qinit file from end of RAPID simulation
+        #     use_all_processors=True
+        # )
 
         # On first iteration, get the timestep for the simulation from the m3 file just made, and the total time within the
         # given interval (changes depending on leap year), both in seconds, to be given as arguments in the namelist file
         if int(start_date.year) == start_year:
-            print(start_year)
             m3_nc_files = sorted(glob(os.path.join(rapid_outputs, 'm3*.nc')))
             simulation_timestep = np.timedelta64(np.diff(xr.open_dataset(m3_nc_files[0]).time.values)[0], 's').astype('int') #open output file, get timestep in seconds, cast to int
             use_qinit_file = False # No qinit file for first step
@@ -101,7 +100,6 @@ def gen_inflow_namelist(rapid_inputs: str,
             qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}"
         time_total = int((end_date - start_date).total_seconds())
         
-
         generate_namelist(
             namelist_save_path = os.path.join(namelist_dir, f'rapid_namelist_{start_date_code}to{end_date_code}'),
 
@@ -109,8 +107,8 @@ def gen_inflow_namelist(rapid_inputs: str,
             x_file = os.path.join(rapid_inputs, "x.csv"),
             riv_bas_id_file = os.path.join(rapid_inputs, "riv_bas_id.csv"),
             rapid_connect_file = os.path.join(rapid_inputs, "rapid_connect.csv"),
-            vlat_file = os.path.join(rapid_inputs, f"m3_VPU_era5_t640_24hr_{start_date_code}to{end_date_code}.nc"), #potentially delete every step
-            qout_file = os.path.join(rapid_inputs, f"Qout_VPU_{start_date_code}to{end_date_code}.nc"),
+            vlat_file = glob(os.path.join(rapid_outputs, f"m3*{start_date_code}to{end_date_code}.nc"))[0], #potentially delete every step
+            qout_file = os.path.join(rapid_outputs, f"Qout_{start_date_code}to{end_date_code}.nc"),
 
             time_total = time_total,
             timestep_calc_routing = 900,
@@ -185,8 +183,8 @@ def gen_inflow_namelist(rapid_inputs: str,
             x_file = os.path.join(rapid_inputs, "x.csv"),
             riv_bas_id_file = os.path.join(rapid_inputs, "riv_bas_id.csv"),
             rapid_connect_file = os.path.join(rapid_inputs, "rapid_connect.csv"),
-            vlat_file = os.path.join(rapid_inputs, f"m3_VPU_era5_t640_24hr_{start_date_code}to{end_date_code}.nc"), #potentially delete every step
-            qout_file = os.path.join(rapid_inputs, f"Qout_VPU_{start_date_code}to{end_date_code}.nc"),
+            vlat_file = glob(os.path.join(rapid_outputs, f"m3*{start_date_code}to{end_date_code}.nc"))[0], #potentially delete every step
+            qout_file = os.path.join(rapid_outputs, f"Qout_{start_date_code}to{end_date_code}.nc"),
 
             time_total = time_total,
             timestep_calc_routing = 900,
