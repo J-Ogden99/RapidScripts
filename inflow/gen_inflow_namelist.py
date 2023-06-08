@@ -2,9 +2,7 @@ from RAPIDpy.inflow.lsm_rapid_process import run_lsm_rapid_process
 from RAPIDpy.rapid import RAPID
 from generate_namelist import generate_namelist
 from datetime import datetime
-# from netCDF4 import Dataset
 import numpy as np
-import cProfile
 from glob import glob
 import pandas as pd
 import xarray as xr
