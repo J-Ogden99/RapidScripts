@@ -98,7 +98,7 @@ def generate_namelist(
         'riv_bas_id_file': f'"{riv_bas_id_file}"',
         'Qout_file': f'"{qout_file}"',
         'Vlat_file': f'"{vlat_file}"',
-        # 'V_files': f'"{v_file}"',
+        'V_file': f'"{v_file}"',
 
         'IS_opt_run': run_type,
         'IS_opt_routing': routing_type,

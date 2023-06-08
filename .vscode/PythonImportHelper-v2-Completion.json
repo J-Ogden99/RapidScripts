@@ -96,7 +96,7 @@
         "kind": 2,
         "importPath": "inflow.gen_inflow_namelist",
         "description": "inflow.gen_inflow_namelist",
-        "peekOfCode": "def gen_inflow_namelist(rapid_inputs: str,\n                        rapid_outputs: str,\n                        lsm_data_dir: str,\n                        namelist_dir: str, \n                        start_year: int = 1940, \n                        end_year: int = 2022, \n                        interval: int = 10):\n    \"\"\"\n    Generates inflow files to input into RAPID, as well as a cooresponding namelist file that gives\n    the correct arguments for RAPID. Is run for every VPU number, and as such all directories given",
+        "peekOfCode": "def gen_inflow_namelist(rapid_inputs: str,\n                        rapid_inflows: str,\n                        rapid_outflows: str,\n                        lsm_data_dir: str,\n                        namelist_dir: str, \n                        start_year: int = 1940, \n                        end_year: int = 2022, \n                        interval: int = 10):\n    \"\"\"\n    Generates inflow files to input into RAPID, as well as a cooresponding namelist file that gives",
         "detail": "inflow.gen_inflow_namelist",
         "documentation": {}
     },
