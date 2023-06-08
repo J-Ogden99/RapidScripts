@@ -90,9 +90,17 @@ def gen_inflow_namelist(rapid_inputs: str,
         # On first iteration, get the timestep for the simulation from the m3 file just made, and the total time within the
         # given interval (changes depending on leap year), both in seconds, to be given as arguments in the namelist file
         if int(start_date.year) == start_year:
+            print(start_year)
             m3_nc_files = sorted(glob(os.path.join(rapid_outputs, 'm3*.nc')))
             simulation_timestep = np.timedelta64(np.diff(xr.open_dataset(m3_nc_files[0]).time.values)[0], 's').astype('int') #open output file, get timestep in seconds, cast to int
+            use_qinit_file = False # No qinit file for first step
+            qinit_file = ''
+        else:
+            last_step_date_code = datetime(start_date.year - 1, 12, 31).strftime("%Y%m%d")
+            use_qinit_file = True # qinit file is Qfinal from last run.
+            qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}"
         time_total = int((end_date - start_date).total_seconds())
+        
 
         generate_namelist(
             namelist_save_path = os.path.join(namelist_dir, f'rapid_namelist_{start_date_code}to{end_date_code}'),
@@ -113,8 +121,8 @@ def gen_inflow_namelist(rapid_inputs: str,
             # run_type: int = 1,
             # routing_type = 1,
 
-            use_qinit_file = True,
-            qinit_file = f"Qfinal_{vpu_id}_{int(start_date_code) - 8870}", # qinit_VPU_DATE.csv 8870 is difference between numerical representation of Jan. 1st and Dec 31st
+            use_qinit_file = use_qinit_file,
+            qinit_file = qinit_file, # qinit_VPU_DATE.csv 8870 is difference between numerical representation of Jan. 1st and Dec 31st
 
             write_qfinal_file = True,
             qfinal_file = f'Qfinal_{vpu_id}_{end_date_code}',
@@ -149,6 +157,7 @@ def gen_inflow_namelist(rapid_inputs: str,
         start_date_code = start_date.strftime("%Y%m%d")
         end_date_code = end_date.strftime("%Y%m%d")
         time_total = int((end_date - start_date).total_seconds())
+        last_step_date_code = datetime(end_year, 12, 31).strftime("%Y%m%d")
 
         run_lsm_rapid_process(
             rapid_executable_location='',
@@ -189,7 +198,7 @@ def gen_inflow_namelist(rapid_inputs: str,
             # routing_type = 1,
 
             use_qinit_file = True,
-            qinit_file = f"Qfinal_{vpu_id}_{int(start_date_code) - 8870}", # qinit_VPU_DATE.csv 8870 is difference between numerical representation of Jan. 1st and Dec 31st
+            qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}",
 
             write_qfinal_file = True,
             qfinal_file = f'Qfinal_{vpu_id}_{end_date_code}',
