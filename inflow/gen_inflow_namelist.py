@@ -97,7 +97,7 @@ def gen_inflow_namelist(rapid_inputs: str,
         else:
             last_step_date_code = datetime(start_date.year - 1, 12, 31).strftime("%Y%m%d")
             use_qinit_file = True # qinit file is Qfinal from last run.
-            qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}"
+            qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}.nc"
         time_total = int((end_date - start_date).total_seconds())
         
         generate_namelist(
@@ -123,7 +123,7 @@ def gen_inflow_namelist(rapid_inputs: str,
             qinit_file = qinit_file, # qinit_VPU_DATE.csv 8870 is difference between numerical representation of Jan. 1st and Dec 31st
 
             write_qfinal_file = True,
-            qfinal_file = f'Qfinal_{vpu_id}_{end_date_code}',
+            qfinal_file = f'Qfinal_{vpu_id}_{end_date_code}.nc',
 
             # compute_volumes = False,
             # v_file = '',
@@ -196,10 +196,10 @@ def gen_inflow_namelist(rapid_inputs: str,
             # routing_type = 1,
 
             use_qinit_file = True,
-            qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}",
+            qinit_file = f"Qfinal_{vpu_id}_{last_step_date_code}.nc",
 
             write_qfinal_file = True,
-            qfinal_file = f'Qfinal_{vpu_id}_{end_date_code}',
+            qfinal_file = f'Qfinal_{vpu_id}_{end_date_code}.nc',
 
             # compute_volumes = False,
             # v_file = '',
