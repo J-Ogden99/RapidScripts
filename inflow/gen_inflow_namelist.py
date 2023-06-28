@@ -1,13 +1,14 @@
 # from RAPIDpy.inflow.lsm_rapid_process import run_lsm_rapid_process
 # from RAPIDpy.rapid import RAPID
-from generate_namelist import generate_namelist
+import os
 from datetime import datetime
-import numpy as np
 from glob import glob
+
+import numpy as np
 import pandas as pd
 import xarray as xr
-from time import time
-import os
+
+from generate_namelist import generate_namelist
 
 
 def gen_inflow_namelist(rapid_inputs: str,
@@ -29,10 +30,12 @@ def gen_inflow_namelist(rapid_inputs: str,
                             with just the VPU number. (read only)
         rapid_inflows (str):Path to directory that will contain the inflow files. Should also be a directory 
                             titled with just the VPU number.
-        rapid_discharge (str): Path to directory that the namelist will tell RAPID to write Qout files to. Also VPU-specific
-        lsm_data_dir (str): Path to directory with Land Surface Model .nc files, one for every day in the run. (read only)
-        namelist_dir (str): Path to write namelists to. The namelists will be written as rapid_namelist_{start_date}to{end_date}.
-                            This is also VPU-specific.
+        rapid_discharge (str): Path to directory that the namelist will tell RAPID to write Qout files to. Also
+                               VPU-specific
+        lsm_data_dir (str): Path to directory with Land Surface Model .nc files, one for every day in the run.
+                            (read only)
+        namelist_dir (str): Path to write namelists to. The namelists will be written as
+                            rapid_namelist_{start_date}to{end_date}. This is also VPU-specific.
         start_year (int): Year to begin simulation. Default 1940.
         end_year (int): Year to end simulation (simulation runs through end of year provided). Default 2022
         interval (int): Number of years to simulate over for each step. Default is 10.
@@ -49,7 +52,8 @@ def gen_inflow_namelist(rapid_inputs: str,
             os.makedirs(path)
 
     # Check for excess years after counting even numbers of years from start_year based on interval.
-    # If excess found, extend end_year so that one more full interval can be made, old_end stores original value for later use.
+    # If excess found, extend end_year so that one more full interval can be made, old_end stores original value for
+    # later use.
     old_end = end_year
     if (end_year - start_year + 1) % interval != 0:
         end_year += interval - ((end_year + start_year - 1) % interval)
@@ -67,7 +71,8 @@ def gen_inflow_namelist(rapid_inputs: str,
             freq=f'{interval}A-DEC'
         )
         ):
-        # When the length of the interval passes the original end, the end year back so the file names won't overlap the actual span available
+        # When the length of the interval passes the original end, the end year back so the file names won't overlap
+        # the actual span available
         if end_date.year > old_end:
             end_date = datetime(old_end, 12, 31)
         start_date_code = start_date.strftime("%Y%m%d")
@@ -88,16 +93,19 @@ def gen_inflow_namelist(rapid_inputs: str,
                 generate_return_periods_file=False,  # if you want to get return period file from RAPID simulation
                 return_period_method='weibull',
                 generate_seasonal_averages_file=False,
-                generate_seasonal_initialization_file=False,  # if you want to get seasonal init file from RAPID simulation
+                generate_seasonal_initialization_file=False,  # if you want to get seasonal init file from RAPID
+                                                              # simulation
                 generate_initialization_file=False,  # if you want to generate qinit file from end of RAPID simulation
                 use_all_processors=True
             )
 
-        # On first iteration, get the timestep for the simulation from the m3 file just made, and the total time within the
-        # given interval (changes depending on leap year), both in seconds, to be given as arguments in the namelist file
+        # On first iteration, get the timestep for the simulation from the m3 file just made, and the total time within
+        # the given interval (changes depending on leap year), both in seconds, to be given as arguments in the namelist
+        # file
         if int(start_date.year) == start_year:
             m3_nc_files = sorted(glob(os.path.join(rapid_inflows, 'm3*.nc')))
-            simulation_timestep = np.timedelta64(np.diff(xr.open_dataset(m3_nc_files[0]).time.values)[0], 's').astype('int') #open output file, get timestep in seconds, cast to int
+            simulation_timestep = np.timedelta64(np.diff(xr.open_dataset(m3_nc_files[0]).time.values)[0], 's').astype(
+                'int')  # open output file, get timestep in seconds, cast to int
             use_qinit_file = False # No qinit file for first step
             qinit_file = ''
         else:
@@ -107,50 +115,51 @@ def gen_inflow_namelist(rapid_inputs: str,
         time_total = int((end_date - start_date).total_seconds())
         
         generate_namelist(
-            namelist_save_path = os.path.join(namelist_dir, f'rapid_namelist_{vpu_id}_{start_date_code}_{end_date_code}'),
+            namelist_save_path=os.path.join(namelist_dir, f'rapid_namelist_{vpu_id}_{start_date_code}_{end_date_code}'),
 
-            k_file = os.path.join(rapid_inputs, "k.csv"),
-            x_file = os.path.join(rapid_inputs, "x.csv"),
-            riv_bas_id_file = os.path.join(rapid_inputs, "riv_bas_id.csv"),
-            rapid_connect_file = os.path.join(rapid_inputs, "rapid_connect.csv"),
-            vlat_file = glob(os.path.join(rapid_inflows, f"m3_{vpu_id}*{start_date_code}_{end_date_code}.nc"))[0], #potentially delete every step, need to remove the "to" in rapidpy
-            qout_file = os.path.join(rapid_discharge, f"Qout_{vpu_id}_{start_date_code}_{end_date_code}.nc"),
+            k_file=os.path.join(rapid_inputs, "k.csv"),
+            x_file=os.path.join(rapid_inputs, "x.csv"),
+            riv_bas_id_file=os.path.join(rapid_inputs, "riv_bas_id.csv"),
+            rapid_connect_file=os.path.join(rapid_inputs, "rapid_connect.csv"),
+            vlat_file=glob(os.path.join(rapid_inflows, f"m3_{vpu_id}*{start_date_code}_{end_date_code}.nc"))[0],
+            # potentially delete every step, need to remove the "to" in rapidpy
+            qout_file=os.path.join(rapid_discharge, f"Qout_{vpu_id}_{start_date_code}_{end_date_code}.nc"),
 
-            time_total = time_total,
-            timestep_calc_routing = 900,
-            timestep_calc = simulation_timestep,
-            timestep_inp_runoff = simulation_timestep,
+            time_total=time_total,
+            timestep_calc_routing=900,
+            timestep_calc=simulation_timestep,
+            timestep_inp_runoff=simulation_timestep,
 
             # Optional - Flags for RAPID Options
             # run_type: int = 1,
             # routing_type = 1,
 
-            use_qinit_file = use_qinit_file,
-            qinit_file = qinit_file,
+            use_qinit_file=use_qinit_file,
+            qinit_file=qinit_file,
 
-            write_qfinal_file = True,
-            qfinal_file = os.path.join(rapid_discharge, f'Qfinal_{vpu_id}_{end_date_code}.nc'),
+            write_qfinal_file=True,
+            qfinal_file=os.path.join(rapid_discharge, f'Qfinal_{vpu_id}_{end_date_code}.nc'),
 
             # compute_volumes = False,
             # v_file = '',
 
-            use_dam_model = False,  # todo more options here
-            use_influence_model = False,
-            use_forcing_file = False,
-            use_uncertainty_quantification = False,
+            use_dam_model=False,
+            use_influence_model=False,
+            use_forcing_file=False,
+            use_uncertainty_quantification=False,
 
-            opt_phi = 1,
+            opt_phi=1,
 
             # Optional - Can be determined from rapid_connect
-            reaches_in_rapid_connect = None,
-            max_upstream_reaches = None,
+            reaches_in_rapid_connect=None,
+            max_upstream_reaches=None,
 
             # Optional - Can be determined from riv_bas_id_file
-            reaches_total = None,
+            reaches_total=None,
 
             # Optional - Optimization Runs Only
-            time_total_optimization = 0,
-            timestep_observations = 0,
-            timestep_forcing = 0
+            time_total_optimization=0,
+            timestep_observations=0,
+            timestep_forcing=0
         )
         
