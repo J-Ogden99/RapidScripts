@@ -1,5 +1,4 @@
-# from RAPIDpy.inflow.lsm_rapid_process import run_lsm_rapid_process
-# from RAPIDpy.rapid import RAPID
+from RAPIDpy.inflow.lsm_rapid_process import run_lsm_rapid_process
 import os
 from datetime import datetime
 from glob import glob
