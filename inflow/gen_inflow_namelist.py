@@ -98,7 +98,7 @@ def gen_inflow_namelist(rapid_inputs: str,
                 use_all_processors=True
             )
 
-        # On first iteration, get the timestep for the simulation from the m3 file just made, and the total time within
+        # On first iteration, get the time-step for the simulation from the m3 file just made, and the total time within
         # the given interval (changes depending on leap year), both in seconds, to be given as arguments in the namelist
         # file
         if int(start_date.year) == start_year:
