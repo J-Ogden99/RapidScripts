@@ -70,8 +70,8 @@ def gen_inflow_namelist(rapid_inputs: str,
             freq=f'{interval}A-DEC'
         )
         ):
-        # When the length of the interval passes the original end, the end year back so the file names won't overlap
-        # the actual span available
+        # When the length of the interval passes the original end, move the end year back so the file names won't
+        # overlap the actual span available
         if end_date.year > old_end:
             end_date = datetime(old_end, 12, 31)
         start_date_code = start_date.strftime("%Y%m%d")
